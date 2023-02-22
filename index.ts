@@ -8,5 +8,8 @@ const app = new Application();
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-console.log(`Application is running on https://localhost:${PORT}`);
+app.addEventListener("listen", ({hostname, port, secure}) => {
+    console.log(`Listening on: ${secure ? "https://" : "http://"}${hostname ?? "localhost"}:${port}`);
+});
+
 await app.listen({port: PORT});
