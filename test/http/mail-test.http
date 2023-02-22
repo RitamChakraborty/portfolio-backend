@@ -1,2 +1,9 @@
 ### Send Mail
-GET http://localhost:8080/api/sendMail
+POST http://localhost:8080/api/sendMail
+Content-Type: application/json
+
+{
+  "email": "abc@xyz.com",
+  "subject": "Email Subject Test",
+  "content": "<h1>Hello</hi><p>This is another test.</p><p>Thanks</p>"
+}
