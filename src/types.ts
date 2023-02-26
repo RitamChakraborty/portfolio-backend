@@ -7,6 +7,7 @@ export interface ResponseEntity {
 
 export interface EmailRequest {
     email: string;
+    name: string;
     subject: string;
     content: string;
 }
