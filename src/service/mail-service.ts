@@ -1,35 +1,81 @@
-import {SmtpClient} from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 import {EmailRequest} from "../types.ts";
-import {assert} from "https://deno.land/x/oak@v11.1.0/util.ts";
+import {Util} from "../util/util.ts";
+import {EmailType, EndPoint, Env} from "../data/constant.ts";
+import {error, info} from "https://deno.land/std@0.177.0/log/mod.ts";
 
+/**
+ * Generates request body to be sent to *Sendgrid* for sending mail
+ *
+ * @param masterEmail {string} - sendgrid authorized email
+ * @param receiverEmail {string} - email of the receiver
+ * @param emailRequest {EmailRequest} - sender information
+ * @return {string} - string value of the request body
+ * @function
+ */
+function createSendgridEmailRequest(masterEmail: string, receiverEmail: string, emailRequest: EmailRequest): string {
+    const sendgridEmailRequest = {
+        personalizations: [
+            {
+                to: [
+                    {
+                        email: receiverEmail
+                    }
+                ]
+            }
+        ],
+        from: {
+            name: emailRequest.name,
+            email: masterEmail
+        },
+        subject: emailRequest.subject,
+        content: [
+            {
+                type: EmailType.TEXT_HTML,
+                value: emailRequest.content
+            }
+        ]
+    }
+
+    return JSON.stringify(sendgridEmailRequest);
+}
+
+/**
+ * Sends mail through *Sendgrid*
+ *
+ * Get the sendgrid api endpoint, sendgrid authorized email address, receiver email address, sendgrid authorization
+ * token from the environment variable. If any of the environment variable is missing, it'll throw an error. It creates
+ * the header with the content type and the authorization as bearer token. And send a send mail request to sendgrid.
+ * Depending on if the email is sent or not a boolean value is returned.
+ *
+ * @param emailRequest {EmailRequest} - sender information
+ * @return {boolean} - `true` if mail is successfully sent, `false` otherwise
+ * @function
+ */
 export async function sendMail(emailRequest: EmailRequest): Promise<boolean> {
-    const client = new SmtpClient();
-    const username: string = Deno.env.get("GMAIL_USERNAME")! ?? assert('Gmail username not found in env');
-    const password: string = Deno.env.get("GMAIL_PASSWORD")! ?? assert('Gmail password not found in env');
-
-    console.debug("Username", username);
-    console.debug("Password", password);
-    console.info("Email request", emailRequest);
-
-    await client.connectTLS({
-        hostname: "smtp.gmail.com",
-        port: 465,
-        username: username,
-        password: password,
-    });
+    const sendgridApi: string = Util.getEnv(Env.SENDGRID_API);
+    const sendMailEndpoint = `${sendgridApi}${EndPoint.SENDGRID_SEND_EMAIL}`;
+    const masterEmail: string = Util.getEnv(Env.MASTER_EMAIL);
+    const receiverEmail: string = Util.getEnv(Env.RECEIVER_EMAIL);
+    const authorizationToken: string = Util.getEnv(Env.SENDGRID_AUTH_TOKEN);
+    const headers = {
+        "Authorization": `Bearer ${authorizationToken}`,
+        "Content-Type": "application/json"
+    };
+    const sendgridEmailRequest: string = createSendgridEmailRequest(masterEmail, receiverEmail, emailRequest);
+    info(`Sendgrid Email Request: ${sendgridEmailRequest}`);
 
     try {
-        await client.send({
-            from: emailRequest.email,
-            to: username,
-            subject: emailRequest.subject,
-            content: emailRequest.content
-        });
+        await fetch(
+            sendMailEndpoint,
+            {
+                method: 'POST',
+                headers: headers,
+                body: sendgridEmailRequest
+            }
+        );
     } catch (e) {
-        console.error("Failed to send email", e);
+        error(`Failed to send email ${e}`);
         return false;
-    } finally {
-        await client.close();
     }
 
     return true;
