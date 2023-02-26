@@ -3,7 +3,8 @@ POST http://localhost:8080/api/sendMail
 Content-Type: application/json
 
 {
-  "email": "abc@xyz.com",
-  "subject": "Email Subject Test",
-  "content": "<h1>Hello</hi><p>This is another test.</p><p>Thanks</p>"
+  "email": "jhinuk150@gmail.com",
+  "name": "Jhinuk Mahanty",
+  "subject": "Sendgrid email test",
+  "content": "<h3>Hi,</h3><p>This is a test with sendgrid</p>"
 }
