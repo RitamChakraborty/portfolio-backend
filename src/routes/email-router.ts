@@ -2,23 +2,21 @@ import {RouteParams, Router, RouterContext} from "https://deno.land/x/oak@v11.1.
 import {EmailRequest, ResponseEntity} from "../types.ts";
 import {sendMail} from "../service/mail-service.ts";
 import {Status} from "https://deno.land/std@0.152.0/http/http_status.ts";
+import {RestUtil} from "../util/rest-util.ts";
 
 const emailRouter: Router = new Router();
 
 emailRouter
-    .post("/sendMail", async (context: RouterContext<"/sendMail", RouteParams<string>>) => {
-            const requestBody = context.request.body();
-            const emailRequest: EmailRequest = await requestBody.value as EmailRequest;
+    .post("/sendMail", async (context: RouterContext<string, RouteParams<string>>) => {
+            const emailRequest: EmailRequest = await RestUtil.getRequestBody<EmailRequest>(context);
             const sendStatus: boolean = await sendMail(emailRequest)
-            const status: Status = sendStatus ? Status.OK : Status.InternalServerError;
-            const message: string = sendStatus ? "Mail sent successfully" : "Failed to send email";
-            context.response.body = {
-                status: status,
+            const responseBody: ResponseEntity = {
+                status: Status.OK,
                 data: {
-                    message: message
+                    message: "Mail sent successfully"
                 }
-            } as ResponseEntity;
-            context.response.status = Status.OK;
+            }
+            RestUtil.createResponseEntity(context, responseBody);
         }
     );
 
