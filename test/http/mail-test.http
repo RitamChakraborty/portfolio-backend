@@ -1,6 +1,7 @@
 ### Send Mail
 POST http://localhost:8080/api/sendMail
 Content-Type: application/json
+Accept: application/json
 
 {
   "email": "jhinuk150@gmail.com",
