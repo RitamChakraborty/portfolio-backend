@@ -11,3 +11,11 @@ export interface EmailRequest {
     subject: string;
     content: string;
 }
+
+export interface SendEmailRequest {
+    senderName: string;
+    senderEmail: string;
+    subject: string;
+    content: string;
+    receiverEmail: string
+}
