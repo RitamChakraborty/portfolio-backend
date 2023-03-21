@@ -1,42 +1,44 @@
-import {EmailRequest, SendEmailRequest} from "../types.ts";
-import {EmailType, EndPoint, Env} from "../data/constant.ts";
-import {error, info} from "https://deno.land/std@0.177.0/log/mod.ts";
-import emailConfig from "../config/email-config.ts";
-import sendgridConfig from "../config/sendgrid-config.ts";
-import ObjectMapper from "../util/object-mapper.ts";
-import {Util} from "../util/util.ts";
-import {HttpError} from "https://deno.land/x/oak@v11.1.0/mod.ts";
+import { EmailRequest, SendEmailRequest } from '../types.ts'
+import { EmailType, EndPoint, Env } from '../data/constant.ts'
+import { error, info } from 'https://deno.land/std@0.177.0/log/mod.ts'
+import emailConfig from '../config/email-config.ts'
+import sendgridConfig from '../config/sendgrid-config.ts'
+import ObjectMapper from '../util/object-mapper.ts'
+import { Util } from '../util/util.ts'
+import { HttpError } from 'https://deno.land/x/oak@v11.1.0/mod.ts'
 
 /**
  * Generates request body to be sent to *Sendgrid* for sending mail
  *
  * @param sendEmailRequest - {@link SendEmailRequest} the object containing mail information
  */
-function createSendgridEmailRequest(sendEmailRequest: SendEmailRequest): string {
-    const sendgridEmailRequest = {
-        personalizations: [
-            {
-                to: [
-                    {
-                        email: sendEmailRequest.receiverEmail
-                    }
-                ]
-            }
-        ],
-        from: {
-            name: sendEmailRequest.senderName,
-            email: sendgridConfig().masterEmail
-        },
-        subject: sendEmailRequest.subject,
-        content: [
-            {
-                type: EmailType.TEXT_HTML,
-                value: sendEmailRequest.content
-            }
-        ]
-    }
+function createSendgridEmailRequest(
+	sendEmailRequest: SendEmailRequest,
+): string {
+	const sendgridEmailRequest = {
+		personalizations: [
+			{
+				to: [
+					{
+						email: sendEmailRequest.receiverEmail,
+					},
+				],
+			},
+		],
+		from: {
+			name: sendEmailRequest.senderName,
+			email: sendgridConfig().masterEmail,
+		},
+		subject: sendEmailRequest.subject,
+		content: [
+			{
+				type: EmailType.TEXT_HTML,
+				value: sendEmailRequest.content,
+			},
+		],
+	}
 
-    return JSON.stringify(sendgridEmailRequest);
+	return JSON.stringify(sendgridEmailRequest)
 }
 
 /**
@@ -49,32 +51,35 @@ function createSendgridEmailRequest(sendEmailRequest: SendEmailRequest): string 
  * @function
  */
 async function sendEmailBySendgrid(sendEmailRequest: SendEmailRequest) {
-    if (!emailConfig().allowEmail) {
-        return;
-    }
+	if (!emailConfig().allowEmail) {
+		return
+	}
 
-    const sendMailEndpoint = `${sendgridConfig().apiEndpoint}${EndPoint.SENDGRID_SEND_EMAIL}`;
-    const headers = {
-        "Authorization": `Bearer ${sendgridConfig().authorizationToken}`,
-        "Content-Type": "application/json"
-    };
-    const sendgridEmailRequest: string = createSendgridEmailRequest(sendEmailRequest);
-    info(`Sendgrid Email Request: ${sendgridEmailRequest}`);
+	const sendMailEndpoint =
+		`${sendgridConfig().apiEndpoint}${EndPoint.SENDGRID_SEND_EMAIL}`
+	const headers = {
+		'Authorization': `Bearer ${sendgridConfig().authorizationToken}`,
+		'Content-Type': 'application/json',
+	}
+	const sendgridEmailRequest: string = createSendgridEmailRequest(
+		sendEmailRequest,
+	)
+	info(`Sendgrid Email Request: ${sendgridEmailRequest}`)
 
-    try {
-        await fetch(
-            sendMailEndpoint,
-            {
-                method: 'POST',
-                headers: headers,
-                body: sendgridEmailRequest
-            }
-        );
-    } catch (e) {
-        const errMsg = "Failed to send mail";
-        error(errMsg, e);
-        throw new HttpError(errMsg);
-    }
+	try {
+		await fetch(
+			sendMailEndpoint,
+			{
+				method: 'POST',
+				headers: headers,
+				body: sendgridEmailRequest,
+			},
+		)
+	} catch (e) {
+		const errMsg = 'Failed to send mail'
+		error(errMsg, e)
+		throw new HttpError(errMsg)
+	}
 }
 
 /**
@@ -89,8 +94,11 @@ async function sendEmailBySendgrid(sendEmailRequest: SendEmailRequest) {
  * @function
  */
 export async function sendMail(emailRequest: EmailRequest) {
-    const receiverEmail: string = Util.getEnv(Env.RECEIVER_EMAIL);
-    const sendEmailRequest: SendEmailRequest = ObjectMapper.mapEmailRequestToSendEmailRequest(
-        emailRequest, receiverEmail);
-    await sendEmailBySendgrid(sendEmailRequest);
+	const receiverEmail: string = Util.getEnv(Env.RECEIVER_EMAIL)
+	const sendEmailRequest: SendEmailRequest = ObjectMapper
+		.mapEmailRequestToSendEmailRequest(
+			emailRequest,
+			receiverEmail,
+		)
+	await sendEmailBySendgrid(sendEmailRequest)
 }
