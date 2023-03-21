@@ -5,6 +5,7 @@ import emailConfig from "../config/email-config.ts";
 import sendgridConfig from "../config/sendgrid-config.ts";
 import ObjectMapper from "../util/object-mapper.ts";
 import {Util} from "../util/util.ts";
+import {HttpError} from "https://deno.land/x/oak@v11.1.0/mod.ts";
 
 /**
  * Generates request body to be sent to *Sendgrid* for sending mail
@@ -44,10 +45,12 @@ function createSendgridEmailRequest(sendEmailRequest: SendEmailRequest): string 
  * request body to be sent to send grid
  *
  * @param sendEmailRequest - {@link SendEmailRequest} the object contains mail information
+ * @throws {@link HttpError} when failed to send email through send grid
+ * @function
  */
-async function sendEmailBySendgrid(sendEmailRequest: SendEmailRequest): Promise<boolean> {
+async function sendEmailBySendgrid(sendEmailRequest: SendEmailRequest) {
     if (!emailConfig().allowEmail) {
-        return true;
+        return;
     }
 
     const sendMailEndpoint = `${sendgridConfig().apiEndpoint}${EndPoint.SENDGRID_SEND_EMAIL}`;
@@ -68,11 +71,10 @@ async function sendEmailBySendgrid(sendEmailRequest: SendEmailRequest): Promise<
             }
         );
     } catch (e) {
-        error(`Failed to send email ${e}`);
-        return false;
+        const errMsg = "Failed to send mail";
+        error(errMsg, e);
+        throw new HttpError(errMsg);
     }
-
-    return true;
 }
 
 /**
@@ -84,12 +86,11 @@ async function sendEmailBySendgrid(sendEmailRequest: SendEmailRequest): Promise<
  * Depending on if the email is sent or not a boolean value is returned.
  *
  * @param emailRequest {EmailRequest} - sender information
- * @return {boolean} - `true` if mail is successfully sent, `false` otherwise
  * @function
  */
-export function sendMail(emailRequest: EmailRequest): Promise<boolean> {
+export async function sendMail(emailRequest: EmailRequest) {
     const receiverEmail: string = Util.getEnv(Env.RECEIVER_EMAIL);
     const sendEmailRequest: SendEmailRequest = ObjectMapper.mapEmailRequestToSendEmailRequest(
         emailRequest, receiverEmail);
-    return sendEmailBySendgrid(sendEmailRequest);
+    await sendEmailBySendgrid(sendEmailRequest);
 }

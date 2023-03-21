@@ -9,7 +9,7 @@ const emailRouter: Router = new Router();
 emailRouter
     .post("/sendMail", async (context: RouterContext<string, RouteParams<string>>) => {
             const emailRequest: EmailRequest = await RestUtil.getRequestBody<EmailRequest>(context);
-            const sendStatus: boolean = await sendMail(emailRequest)
+            await sendMail(emailRequest)
             const responseBody: ResponseEntity = {
                 status: Status.OK,
                 data: {
