@@ -1,5 +1,5 @@
-import { Util } from '../util/util.ts'
-import { Env } from '../data/constant.ts'
+import {Util} from '../util/util.ts'
+import {Env} from '../data/constant.ts'
 
 type EmailConfigType = {
 	allowEmail: boolean
@@ -8,7 +8,7 @@ type EmailConfigType = {
 
 export default function emailConfig(): EmailConfigType {
 	return {
-		allowEmail: false,
+		allowEmail: JSON.parse(Util.getEnv(Env.ALLOW_EMAIL).toLowerCase()),
 		masterEmail: Util.getEnv(Env.MASTER_EMAIL),
 	}
 }
