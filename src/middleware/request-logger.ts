@@ -1,5 +1,5 @@
-import {ServerLog} from "../types.ts";
 import {log} from "https://deno.land/x/mysql@v2.11.0/mod.ts";
+import {RestUtil} from "../util/rest-util.ts";
 
 export async function requestLogger(
     // deno-lint-ignore no-explicit-any
@@ -7,16 +7,6 @@ export async function requestLogger(
     next: () => Promise<unknown>,
 ) {
     await next();
-    const origin: string = context.request.headers.get('origin');
-    const status: number = context.response.status;
-    const path: string = context.router.url();
-    const requestBody: string = await context.request.body().value;
-    const serverLog: ServerLog = {
-        origin: origin,
-        path: path,
-        status: status,
-        requestBody: requestBody,
-        timestamp: new Date().getTime()
-    }
+    const serverLog = await RestUtil.createServerLog(context);
     log.getLogger().info('Request {}', serverLog);
 }

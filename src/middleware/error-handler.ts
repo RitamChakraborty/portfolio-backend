@@ -1,7 +1,8 @@
-import { isHttpError, Status } from 'https://deno.land/x/oak@v11.1.0/mod.ts'
-import { RestUtil } from '../util/rest-util.ts'
-import { ResponseEntity } from '../types.ts'
-import { error } from 'https://deno.land/std@0.177.0/log/mod.ts'
+import {isHttpError, Status} from 'https://deno.land/x/oak@v11.1.0/mod.ts'
+import {RestUtil} from '../util/rest-util.ts'
+import {ResponseEntity} from '../types.ts'
+import {error} from 'https://deno.land/std@0.177.0/log/mod.ts'
+import {log} from "https://deno.land/x/mysql@v2.11.0/mod.ts";
 
 export async function errorHandler(
 	// deno-lint-ignore no-explicit-any
@@ -15,8 +16,6 @@ export async function errorHandler(
 		let message
 
 		if (isHttpError(err)) {
-			error(`Error occurred with http status: ${err.status}`)
-
 			switch (err.status) {
 				case Status.BadRequest:
 					message = 'Bad request'
@@ -37,5 +36,7 @@ export async function errorHandler(
 			},
 		}
 		RestUtil.createResponseEntity(context, responseEntity)
+		const serverLog = await RestUtil.createServerLog(context);
+		log.getLogger().error('{}', serverLog);
 	}
 }
