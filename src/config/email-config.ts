@@ -1,5 +1,5 @@
-import {Util} from '../util/util.ts'
-import {Env} from '../data/constant.ts'
+import { Util } from '../util/util.ts'
+import { Env } from '../data/constant.ts'
 
 type EmailConfigType = {
 	allowEmail: boolean

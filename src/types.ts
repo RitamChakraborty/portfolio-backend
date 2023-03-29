@@ -1,4 +1,4 @@
-import {Status} from 'https://deno.land/std@0.152.0/http/http_status.ts'
+import { Status } from 'https://deno.land/std@0.152.0/http/http_status.ts'
 
 export interface ResponseEntity {
 	status: Status
