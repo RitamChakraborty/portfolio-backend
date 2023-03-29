@@ -30,7 +30,7 @@ export default function logConfig(): LogConfig {
         },
         loggers: {
             default: {
-                level: 'DEBUG',
+                level: 'INFO',
                 handlers: ['functionFmt'],
             },
         },
