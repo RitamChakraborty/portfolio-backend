@@ -8,5 +8,5 @@ export async function requestLogger(
 ) {
     await next();
     const serverLog = await RestUtil.createServerLog(context);
-    log.getLogger().info('Request {}', serverLog);
+    log.getLogger().info('{}', serverLog);
 }
