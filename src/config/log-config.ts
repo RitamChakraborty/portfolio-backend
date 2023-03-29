@@ -10,8 +10,18 @@ export default function logConfig(): LogConfig {
                     const levelName = logRecord.levelName;
                     const timestamp = logRecord.datetime.toJSON();
 
-                    for (const arg of logRecord.args as string[]) {
-                        msg = msg.replace("{}", arg);
+                    for (const arg of logRecord.args) {
+                        let value = '';
+
+                        if (typeof arg === 'number') {
+                            value = arg.toString();
+                        } else if (typeof arg === 'object') {
+                            value = JSON.stringify(arg);
+                        } else {
+                            value = arg as string;
+                        }
+
+                        msg = msg.replace("{}", value);
                     }
 
                     return `${levelName}\t${timestamp}\t${msg}`;

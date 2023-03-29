@@ -1,8 +1,5 @@
-import {
-	RouteParams,
-	RouterContext,
-} from 'https://deno.land/x/oak@v11.1.0/router.ts'
-import { ResponseEntity } from '../types.ts'
+import {RouteParams, RouterContext,} from 'https://deno.land/x/oak@v11.1.0/router.ts'
+import {ResponseEntity} from '../types.ts'
 
 export class RestUtil {
 	/**
@@ -26,9 +23,9 @@ export class RestUtil {
 	 * @param responseEntity - {@link ResponseEntity} the response entity object that contains status and data
 	 */
 	static createResponseEntity(
-		// deno-lint-ignore no-explicit-any
 		context:
 			| RouterContext<string, RouteParams<string>>
+			// deno-lint-ignore no-explicit-any
 			| Record<string, any>,
 		responseEntity: ResponseEntity,
 	): void {
