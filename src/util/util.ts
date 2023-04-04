@@ -20,7 +20,7 @@ export class Util {
 	}
 
 	/**
-	 * Get value from *.env* file or from the *environment*
+	 * Get value from the *environment*
 	 *
 	 * @param key {string} - name of the environment variable
 	 * @return {string} - value of the environment variable
