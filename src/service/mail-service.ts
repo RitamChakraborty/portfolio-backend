@@ -1,11 +1,11 @@
 import { EmailRequest, SendEmailRequest } from '../types.ts'
 import { EmailType, EndPoint, Env } from '../data/constant.ts'
-import { error, info } from 'https://deno.land/std@0.177.0/log/mod.ts'
 import emailConfig from '../config/email-config.ts'
 import sendgridConfig from '../config/sendgrid-config.ts'
 import ObjectMapper from '../util/object-mapper.ts'
 import { Util } from '../util/util.ts'
 import { HttpError } from 'https://deno.land/x/oak@v11.1.0/mod.ts'
+import * as log from 'https://deno.land/std@0.104.0/log/mod.ts'
 
 /**
  * Generates request body to be sent to *Sendgrid* for sending mail
@@ -15,6 +15,10 @@ import { HttpError } from 'https://deno.land/x/oak@v11.1.0/mod.ts'
 function createSendgridEmailRequest(
 	sendEmailRequest: SendEmailRequest,
 ): string {
+	const senderEmail: string = sendEmailRequest.senderEmail
+	const content: string =
+		`${sendEmailRequest.content}<p>Sent by <a href="mailto:${senderEmail}">${senderEmail}</a></p>`
+	log.getLogger().info('content %s', content)
 	const sendgridEmailRequest = {
 		personalizations: [
 			{
@@ -33,7 +37,7 @@ function createSendgridEmailRequest(
 		content: [
 			{
 				type: EmailType.TEXT_HTML,
-				value: sendEmailRequest.content,
+				value: content,
 			},
 		],
 	}
@@ -64,7 +68,6 @@ async function sendEmailBySendgrid(sendEmailRequest: SendEmailRequest) {
 	const sendgridEmailRequest: string = createSendgridEmailRequest(
 		sendEmailRequest,
 	)
-	info(`Sendgrid Email Request: ${sendgridEmailRequest}`)
 
 	try {
 		await fetch(
@@ -77,7 +80,6 @@ async function sendEmailBySendgrid(sendEmailRequest: SendEmailRequest) {
 		)
 	} catch (e) {
 		const errMsg = 'Failed to send mail'
-		error(errMsg, e)
 		throw new HttpError(errMsg)
 	}
 }
