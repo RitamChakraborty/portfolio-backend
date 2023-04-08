@@ -1,5 +1,5 @@
-import { log } from 'https://deno.land/x/mysql@v2.11.0/mod.ts'
 import { RestUtil } from '../util/rest-util.ts'
+import * as log from 'https://deno.land/std@0.104.0/log/mod.ts'
 
 export async function requestLogger(
 	// deno-lint-ignore no-explicit-any

@@ -7,7 +7,7 @@ import {errorHandler} from "./src/middleware/error-handler.ts";
 import corsConfig from "./src/config/cors-config.ts";
 import {RateLimiter} from "https://deno.land/x/oak_rate_limit@v0.1.1/mod.ts";
 import {requestLogger} from "./src/middleware/request-logger.ts";
-import {log} from "https://deno.land/x/mysql@v2.11.0/mod.ts";
+import * as log from 'https://deno.land/std@0.104.0/log/mod.ts'
 import logConfig from "./src/config/log-config.ts";
 
 const PORT = +(Deno.env.get("PORT") ?? "8080");
